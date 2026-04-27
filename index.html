@@ -2,235 +2,71 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>产品数据看板</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopee EL Mobile Acc Top SKUs</title>
     <style>
-        body { font-family: 'PingFang SC', sans-serif; background: #f0f2f5; color: #333; margin: 0; padding: 20px; }
+        :root { --shopee-orange: #ee4d2d; --bg-gray: #f5f5f5; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-gray); margin: 0; padding: 20px; color: #333; }
         .container { max-width: 1400px; margin: 0 auto; }
-        header { background: #2f54eb; color: white; padding: 15px 25px; border-radius: 8px; margin-bottom: 20px; }
         
-        /* 筛选区样式 */
-        .filter-section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        header { background: var(--shopee-orange); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { margin: 0; font-size: 24px; text-align: center; }
+
+        /* 筛选区 */
+        .filter-section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .filter-group { display: flex; flex-direction: column; gap: 5px; }
-        label { font-size: 12px; color: #666; font-weight: bold; }
-        select, input { padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px; min-width: 150px; }
-        
-        /* 网格布局 */
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.2s; border: 1px solid #e8e8e8; }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        
-        /* 图片展示 */
-        .img-container { width: 100%; height: 200px; background: #fff; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f0f0f0; }
+        .filter-group label { font-size: 12px; font-weight: bold; color: #666; }
+        select { padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-width: 140px; outline: none; transition: border 0.2s; }
+        select:focus { border-color: var(--shopee-orange); }
+
+        /* 产品网格 */
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .card { background: white; border-radius: 8px; overflow: hidden; border: 1px solid #eee; transition: 0.3s; display: flex; flex-direction: column; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+
+        /* 图片 */
+        .img-container { width: 100%; height: 240px; background: #fff; overflow: hidden; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: center; }
         .img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        
-        /* 内容区 */
-        .info { padding: 15px; }
-        .category-path { font-size: 12px; color: #8c8c8c; margin-bottom: 8px; line-height: 1.4; }
-        .tags-row { margin-bottom: 10px; }
-        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-right: 5px; background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
-        
-        .metrics-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee; }
-        .metric-item { font-size: 13px; display: flex; align-items: center; gap: 5px; }
-        .pos { color: #cf1322; font-weight: bold; } /* 正值：红色 */
-        .neg { color: #389e0d; font-weight: bold; } /* 负值：绿色 */
-        
-        .price-range { color: #ee4d2d; font-size: 16px; font-weight: bold; margin-top: 10px; display: block; }
-        
-        .footer-row { margin-top: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .link-btn { text-decoration: none; color: white; background: #ee4d2d; padding: 5px 12px; border-radius: 4px; font-size: 13px; }
-        
-        #countDisplay { margin-left: auto; font-weight: bold; color: #2f54eb; }
+
+        /* 卡片内容 */
+        .info { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; gap: 8px; }
+        .cat-path { font-size: 11px; color: #888; line-height: 1.4; height: 32px; overflow: hidden; }
+        .tags { display: flex; gap: 5px; flex-wrap: wrap; }
+        .tag { font-size: 11px; padding: 2px 6px; border-radius: 3px; border: 1px solid #eee; }
+        .tag-site { background: #e6f7ff; color: #1890ff; border-color: #91d5ff; font-weight: bold; }
+        .tag-type { background: #fff7e6; color: #fa8c16; border-color: #ffd591; }
+
+        .price-range { font-size: 18px; font-weight: bold; color: var(--shopee-orange); margin: 5px 0; }
+
+        /* 趋势指标 */
+        .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-top: 10px; border-top: 1px dashed #eee; }
+        .m-item { font-size: 12px; display: flex; align-items: center; gap: 4px; }
+        .trend-up { color: #52c41a; font-weight: bold; }
+        .trend-down { color: #ff4d4f; font-weight: bold; }
+
+        #status { text-align: center; padding: 40px; font-size: 18px; color: #666; }
+        .count-info { margin-left: auto; font-size: 14px; font-weight: bold; color: var(--shopee-orange); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>产品效能监控看板</h1>
+        <h1>Shopee EL Mobile Acc Top SKUs</h1>
     </header>
 
-    <div class="filter-section">
-        <div class="filter-group">
-            <label>Level 2</label>
-            <select id="l2Filter" onchange="applyFilters()"><option value="">全部</option></select>
-        </div>
-        <div class="filter-group">
-            <label>Level 3</label>
-            <select id="l3Filter" onchange="applyFilters()"><option value="">全部</option></select>
-        </div>
-        <div class="filter-group">
-            <label>Level 4</label>
-            <select id="l4Filter" onchange="applyFilters()"><option value="">全部</option></select>
-        </div>
-        <div class="filter-group">
-            <label>站点 (Site)</label>
-            <select id="siteFilter" onchange="applyFilters()"><option value="">全部</option></select>
-        </div>
-        <div class="filter-group">
-            <label>卖家类型</label>
-            <select id="sellerFilter" onchange="applyFilters()"><option value="">全部</option></select>
-        </div>
+    <div class="filter-section" id="filters" style="display:none;">
+        <div class="filter-group"><label>Level 2</label><select id="l2f" onchange="applyFilters()"><option value="">全部</option></select></div>
+        <div class="filter-group"><label>Level 3</label><select id="l3f" onchange="applyFilters()"><option value="">全部</option></select></div>
+        <div class="filter-group"><label>Level 4</label><select id="l4f" onchange="applyFilters()"><option value="">全部</option></select></div>
+        <div class="filter-group"><label>Site</label><select id="sitef" onchange="applyFilters()"><option value="">全部</option></select></div>
+        <div class="filter-group"><label>Seller Type</label><select id="sellerf" onchange="applyFilters()"><option value="">全部</option></select></div>
         <div class="filter-group">
             <label>排序方式</label>
-            <select id="sortOrder" onchange="applyFilters()">
-                <option value="default">默认</option>
-                <option value="adoDesc">ADO 倒序</option>
-                <option value="adgDesc">ADG 倒序</option>
+            <select id="sortf" onchange="applyFilters()">
+                <option value="">默认</option>
+                <option value="ado">ADO 倒序</option>
+                <option value="adg">ADG 倒序</option>
             </select>
         </div>
-        <span id="countDisplay">已加载: 0</span>
-    </div>
-
-    <div class="product-grid" id="productGrid"></div>
-</div>
-
-<script>
-    let products = [];
-
-    // 根据提供的表头定义的索引
-    const IDX = {
-        update_time: 0,
-        site: 1,
-        seller_type: 2,
-        l2: 3,
-        l3: 4,
-        l4: 5,
-        shop_id: 6,
-        item_id: 7,
-        price_usd: 8,
-        mtd_ado: 9,
-        m1_ado: 10,
-        delta_ado: 11,
-        ado_mom: 12,
-        mtd_adg: 13,
-        m1_adg: 14,
-        delta_adg: 15,
-        adg_mom: 16,
-        mtd_asp: 17,
-        price_range: 18,
-        product_link: 19,
-        product_image: 20
-    };
-
-    async function loadData() {
-        try {
-            const res = await fetch('data.csv');
-            const text = await res.text();
-            // 解析CSV（处理包含逗号的引号字段）
-            products = text.split(/\r?\n/).slice(1).filter(line => line.trim() !== "").map(line => {
-                let r = [], cur = '', q = false;
-                for (let c of line) {
-                    if (c === '"') q = !q;
-                    else if (c === ',' && !q) { r.push(cur.trim()); cur = ''; }
-                    else cur += c;
-                }
-                r.push(cur.trim());
-                return r;
-            });
-
-            initFilterOptions();
-            applyFilters();
-        } catch (e) {
-            console.error("加载失败:", e);
-            document.getElementById('productGrid').innerHTML = "CSV加载失败，请确保文件名为 data.csv 且格式正确。";
-        }
-    }
-
-    function initFilterOptions() {
-        const fillSelect = (id, index) => {
-            const select = document.getElementById(id);
-            const values = [...new Set(products.map(p => p[index]))].filter(v => v).sort();
-            values.forEach(v => {
-                const opt = document.createElement('option');
-                opt.value = v; opt.innerText = v;
-                select.appendChild(opt);
-            });
-        };
-
-        fillSelect('l2Filter', IDX.l2);
-        fillSelect('l3Filter', IDX.l3);
-        fillSelect('l4Filter', IDX.l4);
-        fillSelect('siteFilter', IDX.site);
-        fillSelect('sellerFilter', IDX.seller_type);
-    }
-
-    function applyFilters() {
-        const l2 = document.getElementById('l2Filter').value;
-        const l3 = document.getElementById('l3Filter').value;
-        const l4 = document.getElementById('l4Filter').value;
-        const site = document.getElementById('siteFilter').value;
-        const seller = document.getElementById('sellerFilter').value;
-        const sort = document.getElementById('sortOrder').value;
-
-        let filtered = products.filter(p => {
-            return (!l2 || p[IDX.l2] === l2) &&
-                   (!l3 || p[IDX.l3] === l3) &&
-                   (!l4 || p[IDX.l4] === l4) &&
-                   (!site || p[IDX.site] === site) &&
-                   (!seller || p[IDX.seller_type] === seller);
-        });
-
-        // 排序逻辑
-        if (sort === 'adoDesc') {
-            filtered.sort((a, b) => (parseFloat(b[IDX.mtd_ado]) || 0) - (parseFloat(a[IDX.mtd_ado]) || 0));
-        } else if (sort === 'adgDesc') {
-            filtered.sort((a, b) => (parseFloat(b[IDX.mtd_adg]) || 0) - (parseFloat(a[IDX.mtd_adg]) || 0));
-        }
-
-        render(filtered);
-    }
-
-    function render(dataList) {
-        const grid = document.getElementById('productGrid');
-        document.getElementById('countDisplay').innerText = `已筛选: ${dataList.length}`;
-        grid.innerHTML = '';
-
-        dataList.forEach(p => {
-            const adoMoM = parseFloat(p[IDX.ado_mom]) || 0;
-            const adgMoM = parseFloat(p[IDX.adg_mom]) || 0;
-
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <div class="img-container">
-                    <img src="${p[IDX.product_image]}" onerror="this.src='https://via.placeholder.com/200?text=No+Image'">
-                </div>
-                <div class="info">
-                    <div class="category-path">${p[IDX.l2]} > ${p[IDX.l3]} > ${p[IDX.l4]}</div>
-                    <div class="tags-row">
-                        <span class="tag">${p[IDX.site]}</span>
-                        <span class="tag" style="background:#f6ffed; color:#52c41a; border-color:#b7eb8f;">${p[IDX.seller_type]}</span>
-                    </div>
-                    
-                    <div class="metrics-row">
-                        <div class="metric-item">
-                            ADO MoM: 
-                            <span class="${adoMoM >= 0 ? 'pos' : 'neg'}">
-                                ${adoMoM >= 0 ? '▲' : '▼'} ${p[IDX.ado_mom]}
-                            </span>
-                        </div>
-                        <div class="metric-item">
-                            ADG MoM: 
-                            <span class="${adgMoM >= 0 ? 'pos' : 'neg'}">
-                                ${adgMoM >= 0 ? '▲' : '▼'} ${p[IDX.adg_mom]}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="price-range">Price: ${p[IDX.price_range]}</div>
-
-                    <div class="footer-row">
-                        <span style="font-size:11px; color:#999;">ID: ${p[IDX.item_id]}</span>
-                        <a href="${p[IDX.product_link]}" target="_blank" class="link-btn">查看详情</a>
-                    </div>
-                </div>
-            `;
-            grid.appendChild(card);
-        });
-    }
-
-    window.onload = loadData;
-</script>
-
-</body>
-</html>
+        <div class="count-info" id="countDisplay">
